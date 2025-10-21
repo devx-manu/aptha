@@ -19,6 +19,9 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+app.options("*", cors());
+
+
 // Routes
 const contactRouter = require('./routes/contact');
 const usersRouter = require('./routes/users');
