@@ -4,6 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const path = require("path");
 
 dotenv.config();
 connectDB();
@@ -19,8 +20,8 @@ app.use(
   })
 );
 
-// ✅ Handle preflight requests correctly for Express 5+
-app.options("/*", cors());
+// ✅ Handle preflight requests correctly
+app.options("*", cors()); // fix: replaced '/*' with '*'
 
 // ✅ Body parsers
 app.use(bodyParser.json());
@@ -32,6 +33,12 @@ const usersRouter = require("./routes/users");
 
 app.use("/api/contact", contactRouter);
 app.use("/api/users", usersRouter);
+
+// ✅ Serve frontend (optional, if you have build files in frontend/build)
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+});
 
 // ✅ Root route (for Render health check)
 app.get("/", (req, res) => {
