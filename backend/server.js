@@ -19,27 +19,24 @@ app.use(
   })
 );
 
-// ✅ Handle preflight requests for all routes (fix: use parameterized wildcard)
-app.options("/:any(*)", cors());
-
-// ✅ Body parsers (built-in)
+// ✅ Body parser (built-in)
 app.use(express.json());
 
-// ✅ Routes
-const contactRouter = require("./routes/contact");
-const usersRouter = require("./routes/users");
+// ✅ API routes
+app.use("/api/contact", require("./routes/contact"));
+app.use("/api/users", require("./routes/users"));
 
-app.use("/api/contact", contactRouter);
-app.use("/api/users", usersRouter);
+// ✅ Serve React frontend build
+const frontendBuildPath = path.join(__dirname, "../frontend/build");
+app.use(express.static(frontendBuildPath));
 
-// ✅ Serve frontend (optional)
-app.use(express.static(path.join(__dirname, "../frontend/build")));
-app.get("/:any(*)", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+// ✅ SPA catch-all route for frontend
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, "index.html"));
 });
 
-// ✅ Root route (health check)
-app.get("/", (req, res) => {
+// ✅ Health check endpoint
+app.get("/health", (req, res) => {
   res.send("✅ Aptha backend is running on Render!");
 });
 
