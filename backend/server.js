@@ -5,27 +5,26 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
-// Load environment variables and connect DB
 dotenv.config();
 connectDB();
 
 const app = express();
 
-// ✅ CORS configuration (must come before routes)
+// ✅ CORS setup (frontend URL)
 app.use(
   cors({
-    origin: ["https://aptha.vercel.app"], // your deployed frontend URL
+    origin: ["https://aptha.vercel.app"], // deployed frontend
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   })
 );
 
-// ✅ Handle preflight requests globally
-app.options("*", cors());
+// ✅ Handle preflight requests correctly for Express 5+
+app.options("/*", cors());
 
-// ✅ Body parser (JSON)
+// ✅ Body parsers
 app.use(bodyParser.json());
-app.use(express.json()); // extra safety
+app.use(express.json());
 
 // ✅ Routes
 const contactRouter = require("./routes/contact");
@@ -34,11 +33,11 @@ const usersRouter = require("./routes/users");
 app.use("/api/contact", contactRouter);
 app.use("/api/users", usersRouter);
 
-// ✅ Health check route (optional, useful for Render)
+// ✅ Root route (for Render health check)
 app.get("/", (req, res) => {
-  res.send("Aptha backend is running successfully!");
+  res.send("✅ Aptha backend is running on Render!");
 });
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
