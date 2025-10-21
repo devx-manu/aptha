@@ -1,7 +1,6 @@
 // backend/server.js
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const path = require("path");
@@ -20,11 +19,10 @@ app.use(
   })
 );
 
-// ✅ Handle preflight requests correctly
-app.options("*", cors()); // fix: replaced '/*' with '*'
+// ✅ Handle preflight requests for all routes (fix: use parameterized wildcard)
+app.options("/:any(*)", cors());
 
-// ✅ Body parsers
-app.use(bodyParser.json());
+// ✅ Body parsers (built-in)
 app.use(express.json());
 
 // ✅ Routes
@@ -34,13 +32,13 @@ const usersRouter = require("./routes/users");
 app.use("/api/contact", contactRouter);
 app.use("/api/users", usersRouter);
 
-// ✅ Serve frontend (optional, if you have build files in frontend/build)
+// ✅ Serve frontend (optional)
 app.use(express.static(path.join(__dirname, "../frontend/build")));
-app.get("*", (req, res) => {
+app.get("/:any(*)", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
 });
 
-// ✅ Root route (for Render health check)
+// ✅ Root route (health check)
 app.get("/", (req, res) => {
   res.send("✅ Aptha backend is running on Render!");
 });
