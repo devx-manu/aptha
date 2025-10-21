@@ -1,0 +1,11 @@
+# Node modules
+**/node_modules
+
+# Env files
+**/.env
+
+# Build folder for frontend
+aptha-frontend/build
+
+# Logs
+*.log
