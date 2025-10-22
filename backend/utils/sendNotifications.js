@@ -55,9 +55,8 @@ Message: ${message || "N/A"}
 
 
   } catch (err) {
-    // Detailed error logging
-    console.error("❌ Error sending notifications:", err.response?.data || err.message || err);
-  }
-};
+  console.error("❌ Error sending notifications:", err.response?.data || err.message || err);
+}
+
 
 module.exports = sendNotifications;
