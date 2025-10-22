@@ -1,7 +1,11 @@
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
+console.log("BUSINESS_EMAIL:", process.env.BUSINESS_EMAIL);
+
 // backend/utils/sendNotifications.js
 const nodemailer = require("nodemailer");
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+// require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const sendNotifications = async ({ name, location, phone, email, services, message }) => {
   try {
@@ -46,6 +50,9 @@ Message: ${message || "N/A"}
     });
 
     console.log("✅ Email sent successfully:", info.response);
+
+  
+
 
   } catch (err) {
     // Detailed error logging
