@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
     await form.save();
 
     // Send email and WhatsApp notifications
-  //  await sendNotifications({ name, location, phone, email, services, message });
+    await sendNotifications({ name, location, phone, email, services, message });
 
     res.status(201).json({ success: true, message: "Form submitted successfully" });
   } catch (error) {
