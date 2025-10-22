@@ -1,28 +1,35 @@
+// backend/utils/sendNotifications.js
 const nodemailer = require("nodemailer");
 
+// Main function to send email notifications
 const sendNotifications = async ({ name, location, phone, email, services, message }) => {
   try {
-    // Log environment variables for debugging
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
-    console.log("BUSINESS_EMAIL:", process.env.BUSINESS_EMAIL);
+    // Log environment variables
+    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("🔑 EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
+    console.log("🏢 BUSINESS_EMAIL:", process.env.BUSINESS_EMAIL);
 
-    // Create Gmail transporter
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.BUSINESS_EMAIL) {
+      console.error("❌ Missing email environment variables! Check Render env settings.");
+      return;
+    }
+
+    // Create Gmail transporter with debug
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // SSL
+      service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Must be Gmail App Password
+        pass: process.env.EMAIL_PASS, // MUST be Gmail App Password
       },
+      logger: true,   // Logs SMTP activity to console
+      debug: true,    // Debug mode prints details of connection & sending
     });
 
-    // Verify connection
+    // Verify SMTP connection
     await transporter.verify();
     console.log("✅ Gmail SMTP connection verified");
 
-    // Compose email text
+    // Compose email content
     const emailText = `
 New Contact Form Submission:
 
@@ -43,9 +50,8 @@ Message: ${message || "N/A"}
     });
 
     console.log("✅ Email sent successfully:", info.response);
-
   } catch (err) {
-    console.error("❌ Error sending notifications:", err.message || err);
+    console.error("❌ Error sending notifications:", err);
   }
 };
 
