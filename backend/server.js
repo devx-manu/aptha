@@ -1,6 +1,5 @@
 // backend/server.js
 const express = require("express");
-const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
@@ -10,14 +9,14 @@ connectDB();
 
 const app = express();
 
-// ✅ Allowed origins (include Vercel + localhost)
+// ✅ Allowed origins (Vercel + localhost)
 const allowedOrigins = [
   "https://aptha.vercel.app",
   "https://aptha-i9uat2lgq-dev-kannadigas-projects.vercel.app",
   "http://localhost:3000"
 ];
 
-// ✅ CORS configuration
+// ✅ CORS middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -28,8 +27,10 @@ app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
+  // Respond to preflight requests
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204);
+    res.status(204).end();
+    return;
   }
 
   next();
@@ -46,7 +47,7 @@ const usersRouter = require("./routes/users");
 app.use("/api/contact", contactRouter);
 app.use("/api/users", usersRouter);
 
-// ✅ Health check route (Render)
+// ✅ Health check route
 app.get("/", (req, res) => {
   res.send("✅ Aptha backend is running on Render!");
 });
