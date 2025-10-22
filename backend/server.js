@@ -10,13 +10,24 @@ connectDB();
 const app = express();
 
 // CORS setup
-app.use(
-  cors({
-    origin: ["https://aptha.vercel.app"],
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
+const allowedOrigins = [
+  'https://aptha.vercel.app',
+  'https://aptha-i9uat2lgq-dev-kannadigas-projects.vercel.app', // ← dev link
+  'http://localhost:3000' // ← local testing
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true
+}));
+
 
 // Body parser
 app.use(express.json());
