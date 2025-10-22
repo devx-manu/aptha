@@ -1,35 +1,36 @@
 // backend/utils/sendNotifications.js
 const nodemailer = require("nodemailer");
 
-// Main function to send email notifications
 const sendNotifications = async ({ name, location, phone, email, services, message }) => {
   try {
-    // Log environment variables
-    console.log("📧 EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("🔑 EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
-    console.log("🏢 BUSINESS_EMAIL:", process.env.BUSINESS_EMAIL);
+    // --- Log environment variables ---
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+    console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Loaded" : "❌ Missing");
+    console.log("BUSINESS_EMAIL:", process.env.BUSINESS_EMAIL);
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS || !process.env.BUSINESS_EMAIL) {
-      console.error("❌ Missing email environment variables! Check Render env settings.");
-      return;
-    }
-
-    // Create Gmail transporter with debug
+    // --- Create transporter with debug and logger ---
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // SSL
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // MUST be Gmail App Password
+        pass: process.env.EMAIL_PASS, // Gmail App Password
       },
-      logger: true,   // Logs SMTP activity to console
-      debug: true,    // Debug mode prints details of connection & sending
+      logger: true,
+      debug: true,
     });
 
-    // Verify SMTP connection
-    await transporter.verify();
-    console.log("✅ Gmail SMTP connection verified");
+    // --- Verify connection ---
+    try {
+      await transporter.verify();
+      console.log("✅ Gmail SMTP connection verified");
+    } catch (err) {
+      console.error("❌ Gmail verification failed:", err.message || err);
+      return; // Stop if connection fails
+    }
 
-    // Compose email content
+    // --- Compose email ---
     const emailText = `
 New Contact Form Submission:
 
@@ -41,17 +42,27 @@ Services: ${services?.length ? services.join(", ") : "N/A"}
 Message: ${message || "N/A"}
     `.trim();
 
-    // Send email
-    const info = await transporter.sendMail({
-      from: `"Aptha Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.BUSINESS_EMAIL,
-      subject: "📩 New Contact Form Submission",
-      text: emailText,
-    });
+    // --- Send email with timeout protection ---
+    try {
+      const info = await Promise.race([
+        transporter.sendMail({
+          from: `"Aptha Contact" <${process.env.EMAIL_USER}>`,
+          to: process.env.BUSINESS_EMAIL,
+          subject: "📩 New Contact Form Submission",
+          text: emailText,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("SMTP timeout after 10s")), 10000)
+        ),
+      ]);
 
-    console.log("✅ Email sent successfully:", info.response);
+      console.log("✅ Email sent successfully:", info.response);
+    } catch (err) {
+      console.error("❌ Error sending email:", err.message || err);
+    }
+
   } catch (err) {
-    console.error("❌ Error sending notifications:", err);
+    console.error("❌ Unexpected error in sendNotifications:", err.message || err);
   }
 };
 
